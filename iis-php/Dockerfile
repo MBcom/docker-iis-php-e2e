@@ -1,5 +1,6 @@
-FROM mcr.microsoft.com/windows/servercore/iis:windowsservercore-ltsc2019 as base
+FROM mcr.microsoft.com/windows/servercore:ltsc2019 as base
 
+RUN powershell -command Add-WindowsFeature Web-Server
 
 ADD https://windows.php.net/downloads/releases/php-7.2.34-nts-Win32-VC15-x86.zip php.zip
 RUN powershell -command Expand-Archive -Path php.zip -DestinationPath C:\php && powershell -command Remove-Item php.zip -Force
@@ -23,3 +24,5 @@ RUN     setx PHP /M "C:\PHP"
     
 RUN mkdir c:\web
 WORKDIR c:\\web
+
+CMD  ["C:\\ServiceMonitor.exe", "w3svc"]
