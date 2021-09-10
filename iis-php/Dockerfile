@@ -10,6 +10,7 @@ ADD https://aka.ms/vs/16/release/vc_redist.x64.exe vc_redist.exe
 RUN vc_redist.exe /install /quiet && powershell -command Remove-Item vc_redist.exe -Force
 ADD https://curl.haxx.se/ca/cacert.pem ca.pem
 RUN powershell -command cp ca.pem "C:\php\\" && powershell -command cp c:\php\php.ini-production c:\php\php.ini
+ADD https://xdebug.org/files/php_xdebug-3.0.4-7.4-vc15-nts-x86_64.dll c:\\php\\ext\\xdebug.dll
 RUN powershell -command echo '[PHP_FILEINFO]' 'extension=php_fileinfo.dll' ' ' '[PHP_SQLSRV_72_NTS_X86]' 'extension=php_sqlsrv.dll' ' ' 'curl.cainfo = c:\php\ca.pem' ' ' 'error_log = c:\web\php_erros.log' ' ' 'extension=php_curl.dll' ' ' 'extension=php_exif.dll' ' ' 'extension=php_gettext.dll' ' ' 'extension=php_mbstring.dll' ' ' 'extension=php_openssl.dll' ' ' 'extension=php_soap.dll' ' ' 'extension=php_tidy.dll' ' ' 'extension=php_xmlrpc.dll' >> C:\php\php.ini
 
 COPY msodbcsql.msi .
@@ -34,6 +35,15 @@ RUN     setx PATH /M %PATH%;C:\PHP
 RUN     setx PHP /M "C:\PHP"
     
 RUN mkdir c:\web
-WORKDIR c:\\web
 
-CMD  ["C:\\ServiceMonitor.exe", "w3svc"]
+RUN powershell -command  set-content C:\web\php_erros.log 'Container started'
+
+
+RUN icacls c:\web\php_erros.log /grant IIS_IUSRS:F
+RUN icacls c:\web\php_erros.log /grant IUSR:F
+
+
+WORKDIR c:\\inetpub\\wwwroot\\
+
+#CMD  ["C:\\ServiceMonitor.exe", "w3svc"]
+CMD powershell -command Get-Content "C:\web\\php_erros.log" -Wait
